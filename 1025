@@ -1,0 +1,125 @@
+#include<iostream>
+#include<fstream>
+#include<string>
+#include<algorithm>
+#define INF (1<<30)
+using namespace std;
+int main() {
+	//std::ifstream in("in.txt");
+	//std::streambuf *cinbuf = std::cin.rdbuf();
+	//std::cin.rdbuf(in.rdbuf());
+
+	//ifstream inFile("in.txt");
+	//inFile.open("in.txt");
+	//if (!inFile.is_open()) {
+	//	cout << "Unable to open file";
+	//	system("pause");
+	//	cerr << "Unable to open file datafile.txt";
+	//	exit(1);   // call system to stop
+	//}
+	//else {
+		//cout << "file open" << endl;
+	//}
+	int kase = 0;
+	while (1)
+	{
+		int n;///station number
+		int T;///time
+		cin >> n;///read in line 1
+		//cout << "number of station "<<n<<endl;
+		if (!n)break;
+		cin >> T;///read in line 2
+		//cout << "meeting time " << T << endl;
+		int *t = new int[n];///time intervals
+		t[0] = 0;
+		for (int i = 1; i <= (n - 1); i++) {///read in line 3
+			cin >> t[i];
+		}
+		int M1;///right
+
+		cin >> M1;///read in line 4
+		//cout << "number of train right direction " << M1 << endl;
+		int *d1 = new int[M1 + 1];///right time
+		for (int i = 1; i <= M1; i++) {///read in line 5
+			cin >> d1[i];
+		}
+		int M2;///right
+		cin >> M2;///read in line 4
+		//cout << "number of train left direction " << M2 << endl;
+		int *d2 = new int[M2 + 1];///right time
+		for (int i = 1; i <= M2; i++) {///read in line 5
+			cin >> d2[i];
+		}
+		//cout << "wait for keys to continue" << endl;
+		//system("pause");
+		int*** has_train = new int**[T+1];
+			for(int i = 0; i<= T; i++){
+				has_train[i]= new int*[n+1];
+				for (int j = 1; j <= n; j++)
+				{
+					has_train[i][j] = new int[2];
+					has_train[i][j][0] = 0;
+					has_train[i][j][1] = 0;
+				}
+		}
+		
+		///int has_train[T][n][2];
+		//memset(has_train, 0, (T+1)*(n+1) * 2 * sizeof(int));
+
+		for (int m = 1; m <= M1; m++)
+		{
+			int cum = d1[m];
+			for (int j = 1; j <= n; j++)
+			{
+				if (cum <= T)
+				{
+					has_train[cum][j][0] = 1;
+					cum += t[j];
+				}
+				else
+					break;
+			}
+		}
+		for (int m = 1; m <= M2; m++)
+		{
+			int cum = d2[m];
+			for (int j = n; j >= 1; j--)
+			{
+				if (cum <= T)
+				{
+					has_train[cum][j][1] = 1;
+					cum += t[j - 1];
+				}
+				else
+					break;
+
+			}
+		}
+
+		int **dp = new int*[T+1];
+		for (int i = 0; i <= T; i++)
+			dp[i] = new int[n+1];
+		///int dp[T][n];
+		for (int i = 1; i <= n - 1; i++)dp[T][i] = INF;
+		dp[T][n] = 0;
+
+		for (int i = T - 1; i >= 0; i--)
+			for (int j = 1; j <= n; j++) {
+				dp[i][j] = dp[i + 1][j] + 1;
+				if (j<n && has_train[i][j][0] && i + t[j] <= T)
+					dp[i][j] = std::min(dp[i][j], dp[i + t[j]][j + 1]);
+				if (j>1 && has_train[i][j][1] && i + t[j - 1] <= T)
+					dp[i][j] = std::min(dp[i][j], dp[i + t[j - 1]][j - 1]);
+
+			}
+		cout << "Case Number " << ++kase << ": ";
+		if (dp[0][1] >= INF) cout << "impossible\n";
+		else cout << dp[0][1] << "\n";
+	}
+
+	return 0;
+
+
+
+
+}
